@@ -88,21 +88,7 @@ fun HomeScreen(navController: NavController) {
             )
         },
         topBar = {
-            TopAppBar(
-                modifier = Modifier.height(150.dp).background(Background),
-                colors = TopAppBarDefaults.largeTopAppBarColors(
-                    containerColor = Background ,
-                    titleContentColor = Color.White ,
-                ) ,
-                title = {
-                    Column() {
-                        Spacer(Modifier.height(35.dp))
-                        Text("Keep Your"  , fontSize = 28.sp , fontWeight = FontWeight.W500)
-                        Spacer(Modifier.height(10.dp))
-                        Text("Passwords Safe" , fontSize = 32.sp , fontWeight = FontWeight.Bold)
-                    }
-                }
-            )
+            ContainerTopBar()
         }
     ) { padding ->
         Column(
@@ -120,6 +106,26 @@ fun HomeScreen(navController: NavController) {
            // Text("Welcome to the Secure Area!")
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun ContainerTopBar() {
+    TopAppBar(
+        modifier = Modifier.height(150.dp).background(Background),
+        colors = TopAppBarDefaults.largeTopAppBarColors(
+            containerColor = Background ,
+            titleContentColor = Color.White ,
+        ) ,
+        title = {
+            Column() {
+                Spacer(Modifier.height(35.dp))
+                Text("Keep Your"  , fontSize = 28.sp , fontWeight = FontWeight.W500)
+                Spacer(Modifier.height(10.dp))
+                Text("Passwords Safe" , fontSize = 32.sp , fontWeight = FontWeight.Bold)
+            }
+        }
+    )
 }
 
 @Composable
