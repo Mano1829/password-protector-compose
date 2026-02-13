@@ -66,6 +66,9 @@ import com.mine.passwordprotector.ui.theme.Black
 import com.mine.passwordprotector.ui.theme.Grey
 import com.mine.passwordprotector.ui.theme.White
 
+enum class Action {
+    PASSWORD_VIEW , PASSWORD_DELETE
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -230,15 +233,15 @@ fun HomeScreen(navController: NavController) {
             )
             ContainerPasswordList(
                 filteredPasswordList ,
-                onItemClick = { selectedPassword , mode ->
+                onItemClick = { selectedPassword , action ->
                     selectedPasswordItem = selectedPassword
-                    if(mode == 2) {
-                        deletePasswordModal = true
-                        viewPasswordModal = false
-                    }
-                    else {
-                        viewPasswordModal = true
-                        deletePasswordModal = false
+                    when(action) {
+                        Action.PASSWORD_VIEW -> {
+                            viewPasswordModal = true
+                        }
+                        Action.PASSWORD_DELETE -> {
+                            deletePasswordModal = true
+                        }
                     }
                 }
             )
@@ -360,7 +363,7 @@ fun ContainerCategoryRows(itemList : List<String> , onItemClick : (String) -> Un
 }
 
 @Composable
-fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Password , Int) -> Unit ) { //selectedPassword , mode -> 1 View , 2 -Delete
+fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Password , Action) -> Unit ) { //selectedPassword , mode -> 1 View , 2 -Delete
     LazyColumn(
         modifier = Modifier.fillMaxHeight().fillMaxWidth()
     ) {
@@ -376,7 +379,7 @@ fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Passwor
                     )
                     .clickable {
                         //selectedPasswordItem = password
-                        onItemClick(password , 1)
+                        onItemClick(password , Action.PASSWORD_VIEW)
                     }
             ) {
                Column {
@@ -397,7 +400,7 @@ fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Passwor
                        Icon(
                            painter = painterResource(R.drawable.ic_delete) ,
                            modifier = Modifier.size(25.dp).align(Alignment.CenterEnd).clickable {
-                               onItemClick(password , 2)
+                               onItemClick(password , Action.PASSWORD_DELETE)
                            } ,
                            contentDescription = "Delete" ,
                        )
