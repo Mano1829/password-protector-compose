@@ -57,6 +57,7 @@ import androidx.navigation.NavController
 import com.mine.passwordprotector.R
 import com.mine.passwordprotector.data.local.Password
 import com.mine.passwordprotector.data.local.SessionManager
+import com.mine.passwordprotector.ui.modal.DeleteConfirmationModal
 import com.mine.passwordprotector.ui.modal.StorePasswordModal
 import com.mine.passwordprotector.ui.modal.ViewPasswordModal
 import com.mine.passwordprotector.ui.navigation.Screen
@@ -137,6 +138,8 @@ fun HomeScreen(navController: NavController) {
     var storePasswordModal by remember { mutableStateOf(false) }
     var selectedPasswordItem by remember { mutableStateOf<Password?>(null) }
     var editPassword by remember { mutableStateOf<Password?>(null) }
+    var viewPasswordModal by remember { mutableStateOf(false) }
+    var deletePasswordModal by remember { mutableStateOf(false) }
 
     if(storePasswordModal) {
         StorePasswordModal(editPassword
@@ -154,20 +157,31 @@ fun HomeScreen(navController: NavController) {
         )
     }
 
-    if(selectedPasswordItem != null) {
+    if(viewPasswordModal) {
         ViewPasswordModal(
             selectedPasswordItem!! ,
             onDismiss = {
-                selectedPasswordItem = null
+                viewPasswordModal = false
             } ,
             onCopy = { copiedString ->
                 Log.e("TAG" , "CopiedString :: $copiedString")
-                selectedPasswordItem = null
+                viewPasswordModal = false
             } ,
             onEdit =  { password ->
                 editPassword = password
-                selectedPasswordItem = null
+                viewPasswordModal = false
                 storePasswordModal = true
+            }
+        )
+    }
+
+    if(deletePasswordModal) {
+        DeleteConfirmationModal(selectedPasswordItem!! ,
+            onConfirm = { password ->
+                deletePasswordModal = false
+            } ,
+            onDismiss = {
+                deletePasswordModal = false
             }
         )
     }
@@ -214,10 +228,20 @@ fun HomeScreen(navController: NavController) {
                 color = White,
                 modifier = Modifier.padding(start = 25.dp)
             )
-            ContainerPasswordList(filteredPasswordList) { selectedPassword ->
-                selectedPasswordItem = selectedPassword
-            }
-            // Text("Welcome to the Secure Area!")
+            ContainerPasswordList(
+                filteredPasswordList ,
+                onItemClick = { selectedPassword , mode ->
+                    selectedPasswordItem = selectedPassword
+                    if(mode == 2) {
+                        deletePasswordModal = true
+                        viewPasswordModal = false
+                    }
+                    else {
+                        viewPasswordModal = true
+                        deletePasswordModal = false
+                    }
+                }
+            )
         }
     }
 }
@@ -336,7 +360,7 @@ fun ContainerCategoryRows(itemList : List<String> , onItemClick : (String) -> Un
 }
 
 @Composable
-fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Password) -> Unit) {
+fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Password , Int) -> Unit ) { //selectedPassword , mode -> 1 View , 2 -Delete
     LazyColumn(
         modifier = Modifier.fillMaxHeight().fillMaxWidth()
     ) {
@@ -352,7 +376,7 @@ fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Passwor
                     )
                     .clickable {
                         //selectedPasswordItem = password
-                        onItemClick(password)
+                        onItemClick(password , 1)
                     }
             ) {
                Column {
@@ -372,8 +396,10 @@ fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Passwor
                        )
                        Icon(
                            painter = painterResource(R.drawable.ic_delete) ,
-                           modifier = Modifier.size(25.dp).align(Alignment.CenterEnd) ,
-                           contentDescription = "Delete"
+                           modifier = Modifier.size(25.dp).align(Alignment.CenterEnd).clickable {
+                               onItemClick(password , 2)
+                           } ,
+                           contentDescription = "Delete" ,
                        )
                    }
                    Spacer(Modifier.height(5.dp))
@@ -386,6 +412,7 @@ fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Passwor
                            Box(modifier = Modifier
                                .size(50.dp)
                                .background(color = Color(0xFFB1BCFF) , shape = RoundedCornerShape(10.dp))
+
                            ) {
                                Icon(
                                    painter = painterResource(R.drawable.ic_logo) ,
@@ -406,6 +433,7 @@ fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Passwor
         }
     }
 }
+
 
 
 

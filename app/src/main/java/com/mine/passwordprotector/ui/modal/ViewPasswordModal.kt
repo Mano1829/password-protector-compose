@@ -51,7 +51,7 @@ import com.mine.passwordprotector.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ViewPasswordModal(password: Password , onDismiss : () -> Unit , onCopy : (String) -> Unit , onEdit : (Password) -> Unit) {
+fun ViewPasswordModal(password: Password , onDismiss : () -> Unit , onCopy : (String) -> Unit , onEdit : (Password) -> Unit ) {
     val sheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
     )
