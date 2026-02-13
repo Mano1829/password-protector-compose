@@ -41,6 +41,7 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -56,6 +57,8 @@ import androidx.navigation.NavController
 import com.mine.passwordprotector.R
 import com.mine.passwordprotector.data.local.Password
 import com.mine.passwordprotector.data.local.SessionManager
+import com.mine.passwordprotector.ui.modal.StorePasswordModal
+import com.mine.passwordprotector.ui.modal.ViewPasswordModal
 import com.mine.passwordprotector.ui.navigation.Screen
 import com.mine.passwordprotector.ui.theme.Background
 import com.mine.passwordprotector.ui.theme.Black
@@ -67,24 +70,127 @@ import com.mine.passwordprotector.ui.theme.White
 @Composable
 fun HomeScreen(navController: NavController) {
 
-    val passwordList = listOf<Password>(
-        Password(1 , "CID1" , "Social" , "Facebook" , "manojadfasdfasdfdgdsafd@facebook.com" , "KLFHKDGHKJSAFIEUHJEFKEHU" ,  "12-02-2026 02:42 PM") ,
-        Password(2 , "CID1" , "Entertainment" , "Netflix" , "manoj@facebook.com" , "KLFHKDGHKJSAFIEUHJEFKEHU" ,  "12-02-2026 02:42 PM") ,
-        Password(3 , "CID1" , "Games" , "BGMI" , "manoj@facebook.com" , "KLFHKDGHKJSAFIEUHJEFKEHU" ,  "12-02-2026 02:42 PM") ,
-        Password(4 , "CID1" , "Social" , "Facebook" , "manojms@facebook.com" , "KLFHKDGHKJSAFIEUHJEFKEHU" ,  "12-02-2026 02:42 PM") ,
-        Password(5 , "CID1" , "Games" , "COC" , "manoj@facebook.com" , "KLFHKDGHKJSAFIEUHJEFKEHU" ,  "12-02-2026 02:42 PM") ,
-        Password(6 , "CID1" , "Others" , "Flipkart" , "manoj@facebook.com" , "KLFHKDGHKJSAFIEUHJEFKEHU" ,  "12-02-2026 02:42 PM") ,
-    )
+    val passwordList = remember {
+        mutableStateListOf(
+            Password(
+                1,
+                "CID1",
+                "Social",
+                "Facebook",
+                "manojadfasdfasdfdgdsafd@facebook.com",
+                "KLFHKDGHKJSAFIEUHJEFKEHU",
+                "12-02-2026 02:42 PM"
+            ),
+            Password(
+                2,
+                "CID1",
+                "Entertainment",
+                "Netflix",
+                "manoj@facebook.com",
+                "KLFHKDGHKJSAFIEUHJEFKEHU",
+                "12-02-2026 02:42 PM"
+            ),
+            Password(
+                3,
+                "CID1",
+                "Games",
+                "BGMI",
+                "manoj@facebook.com",
+                "KLFHKDGHKJSAFIEUHJEFKEHU",
+                "12-02-2026 02:42 PM"
+            ),
+            Password(
+                4,
+                "CID1",
+                "Social",
+                "Facebook",
+                "manojms@facebook.com",
+                "KLFHKDGHKJSAFIEUHJEFKEHU",
+                "12-02-2026 02:42 PM"
+            ),
+            Password(
+                5,
+                "CID1",
+                "Games",
+                "COC",
+                "manoj@facebook.com",
+                "KLFHKDGHKJSAFIEUHJEFKEHU",
+                "12-02-2026 02:42 PM"
+            ),
+            Password(
+                6,
+                "CID1",
+                "Others",
+                "Flipkart",
+                "manoj@facebook.com",
+                "KLFHKDGHKJSAFIEUHJEFKEHU",
+                "12-02-2026 02:42 PM"
+            ),
+        )
+    }
 
+    val itemList = listOf<String>("All" , "Social" , "Entertainment" , "Games" , "Others")
+    var selectedCategory by remember { mutableStateOf(itemList[0]) }
+    var expanded by remember { mutableStateOf(false) }
     var filteredPasswordList by remember { mutableStateOf(passwordList.toList()) }
 
+    var storePasswordModal by remember { mutableStateOf(false) }
+    var selectedPasswordItem by remember { mutableStateOf<Password?>(null) }
+    var editPassword by remember { mutableStateOf<Password?>(null) }
+
+    if(storePasswordModal) {
+        StorePasswordModal(editPassword
+            , onDismiss = {
+                storePasswordModal = false
+            }
+            , onSave = { newPassword ->
+                storePasswordModal = false
+                Log.e("TAG" , "newPassword :: ${newPassword.id} , ${newPassword.serviceTitle}")
+                passwordList.add(newPassword)
+                filteredPasswordList = if(selectedCategory == "All") passwordList else passwordList.filter { item -> item.category == selectedCategory }.toList()
+
+                Log.e("TAG" , "passwordList.size :: ${passwordList.size} , filteredPasswordList.size :: ${filteredPasswordList.size}")
+            }
+        )
+    }
+
+    if(selectedPasswordItem != null) {
+        ViewPasswordModal(
+            selectedPasswordItem!! ,
+            onDismiss = {
+                selectedPasswordItem = null
+            } ,
+            onCopy = { copiedString ->
+                Log.e("TAG" , "CopiedString :: $copiedString")
+                selectedPasswordItem = null
+            } ,
+            onEdit =  { password ->
+                editPassword = password
+                selectedPasswordItem = null
+                storePasswordModal = true
+            }
+        )
+    }
+
     Scaffold(
-        containerColor = Background ,
-        floatingActionButtonPosition = FabPosition.End ,
+        containerColor = Background,
+        floatingActionButtonPosition = FabPosition.End,
         floatingActionButton = {
             ExpandableFAB(
-                onStorePasswordClick = { Log.e("TAG" , "Store Password Clicked") } ,
-                onGeneratePasswordClick = { Log.e("TAG" , "Generate New Password Clicked") }
+                expanded =  expanded ,
+                onFabClick = {
+                    expanded = !expanded
+                },
+                onStorePasswordClick = {
+                    Log.e("TAG", "Store Password Clicked")
+                    expanded = !expanded
+                    editPassword = null
+                    storePasswordModal = true
+                },
+                onGeneratePasswordClick = {
+                    Log.e("TAG", "Generate New Password Clicked")
+                    expanded = !expanded
+                }
             )
         },
         topBar = {
@@ -94,16 +200,24 @@ fun HomeScreen(navController: NavController) {
         Column(
             modifier = Modifier.fillMaxSize().padding(padding),
         ) {
-            ContainerCategoryRows { item ->
+            ContainerCategoryRows(itemList) { item ->
                 //   filteredPasswordList = passwordList.stream().filter { password ->  password.category == item }.toList()
+                selectedCategory = item
                 filteredPasswordList =
-                    if (item == "All") passwordList else passwordList.filter { password -> password.category == item }
-                        .toList()
+                    if (item == "All") passwordList else passwordList.filter { password -> password.category == item }.toList()
             }
             Spacer(Modifier.height(20.dp))
-            Text("${filteredPasswordList.size} Passwords" , fontSize = 20.sp , fontWeight = FontWeight.Bold , color = White , modifier = Modifier.padding(start = 25.dp))
-            ContainerPasswordList(filteredPasswordList)
-           // Text("Welcome to the Secure Area!")
+            Text(
+                "${filteredPasswordList.size} Passwords",
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold,
+                color = White,
+                modifier = Modifier.padding(start = 25.dp)
+            )
+            ContainerPasswordList(filteredPasswordList) { selectedPassword ->
+                selectedPasswordItem = selectedPassword
+            }
+            // Text("Welcome to the Secure Area!")
         }
     }
 }
@@ -129,8 +243,8 @@ fun ContainerTopBar() {
 }
 
 @Composable
-fun ExpandableFAB( onStorePasswordClick : () -> Unit , onGeneratePasswordClick : () -> Unit ) {
-    var expanded by remember { mutableStateOf(false) }
+fun ExpandableFAB( expanded : Boolean , onFabClick : () -> Unit ,  onStorePasswordClick : () -> Unit , onGeneratePasswordClick : () -> Unit ) {
+  //  var expanded by remember { mutableStateOf(false) }
     Column(
         horizontalAlignment = Alignment.End ,
     ) {
@@ -144,14 +258,34 @@ fun ExpandableFAB( onStorePasswordClick : () -> Unit , onGeneratePasswordClick :
              //   horizontalAlignment = Alignment.CenterHorizontally ,
               //  verticalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Text("Store Password" , fontSize = 16.sp , fontWeight = FontWeight.W500 , color = Black , modifier = Modifier.padding(start = 15.dp).clickable { onStorePasswordClick() } )
-                Text("Generate New" , fontSize = 16.sp , fontWeight = FontWeight.W500 , color = Black , modifier = Modifier.padding(start = 15.dp).clickable { onGeneratePasswordClick() } )
+                Text("Store Password"
+                    , fontSize = 16.sp
+                    , fontWeight = FontWeight.W500
+                    , color = Black
+                    , modifier = Modifier
+                        .padding(start = 15.dp)
+                        .fillMaxWidth()
+                        .clickable {
+                            onStorePasswordClick()
+                        }
+                )
+                Text("Generate New"
+                    , fontSize = 16.sp
+                    , fontWeight = FontWeight.W500
+                    , color = Black
+                    , modifier = Modifier
+                        .padding(start = 15.dp)
+                        .fillMaxWidth()
+                        .clickable {
+                            onGeneratePasswordClick()
+                        }
+                )
             }
             Spacer(Modifier.height(10.dp))
         }
         FloatingActionButton(
             onClick = {
-                expanded = !expanded
+                onFabClick()
             } ,
             containerColor = Grey ,
             shape = RoundedCornerShape(30.dp),
@@ -166,8 +300,8 @@ fun ExpandableFAB( onStorePasswordClick : () -> Unit , onGeneratePasswordClick :
 }
 
 @Composable
-fun ContainerCategoryRows(onItemClick : (String) -> Unit) {
-    val itemList = listOf<String>("All" , "Social" , "Entertainment" , "Games" , "Others")
+fun ContainerCategoryRows(itemList : List<String> , onItemClick : (String) -> Unit) {
+
     var selectedItem by remember { mutableStateOf(itemList[0]) }
 
     val selectedModifier = Modifier
@@ -202,7 +336,7 @@ fun ContainerCategoryRows(onItemClick : (String) -> Unit) {
 }
 
 @Composable
-fun ContainerPasswordList(passwordList : List<Password>) {
+fun ContainerPasswordList(passwordList : List<Password> , onItemClick : (Password) -> Unit) {
     LazyColumn(
         modifier = Modifier.fillMaxHeight().fillMaxWidth()
     ) {
@@ -216,6 +350,10 @@ fun ContainerPasswordList(passwordList : List<Password>) {
                         color = Color.White ,
                         shape = RoundedCornerShape(10.dp)
                     )
+                    .clickable {
+                        //selectedPasswordItem = password
+                        onItemClick(password)
+                    }
             ) {
                Column {
                    Box(

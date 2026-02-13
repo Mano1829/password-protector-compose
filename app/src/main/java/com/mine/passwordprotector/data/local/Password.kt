@@ -8,7 +8,7 @@ import androidx.room.PrimaryKey
 import androidx.room.Query
 
 data class Password(
-    val id : Int ,
+    val id : Long ,
     val custId : String ,
     val category : String ,
     val serviceTitle : String ,
