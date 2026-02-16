@@ -51,6 +51,7 @@ class SplashViewModel @Inject constructor(
         viewModelScope.launch {
             delay(2000)
             startDestination = "home"
+           // startDestination = "create_password"
             // val userExists = sessionManager.isLoggedIn()
 
         }
@@ -67,7 +68,7 @@ fun SplashScreen(navController : NavHostController , viewModel: SplashViewModel)
         if (destination != null) {
             navController.navigate(destination) {
                 // Clear the splash from the backstack so user can't go back to it
-                popUpTo("splash_screen") { inclusive = true }
+                popUpTo("splash") { inclusive = true }
             }
         }
     }

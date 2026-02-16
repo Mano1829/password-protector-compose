@@ -5,6 +5,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.mine.passwordprotector.ui.screen.CreatePasswordScreen
 import com.mine.passwordprotector.ui.screen.HomeScreen
 import com.mine.passwordprotector.ui.screen.SplashScreen
 import com.mine.passwordprotector.ui.screen.SplashViewModel
@@ -13,6 +14,7 @@ import com.mine.passwordprotector.ui.screen.SplashViewModel
 sealed class Screen(val route : String) {
     object Splash : Screen("splash")
     object Home : Screen("home")
+    object CreatePassword : Screen("create_password")
 }
 
 
@@ -26,6 +28,9 @@ fun AppNavigation(navController : NavHostController) {
         }
         composable(Screen.Home.route) {
             HomeScreen(navController)
+        }
+        composable(Screen.CreatePassword.route) {
+            CreatePasswordScreen(navController)
         }
     }
 

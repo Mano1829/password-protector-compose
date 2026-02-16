@@ -207,6 +207,7 @@ fun HomeScreen(navController: NavController) {
                 onGeneratePasswordClick = {
                     Log.e("TAG", "Generate New Password Clicked")
                     expanded = !expanded
+                    navController.navigate("create_password")
                 }
             )
         },
