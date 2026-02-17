@@ -19,6 +19,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.mine.passwordprotector.ui.screen.OnClick
@@ -29,9 +30,10 @@ import com.mine.passwordprotector.ui.theme.White
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun InputLengthModal(onClick: OnClick, currentLength : Int, onDismiss : () -> Unit, onSave : (Int) -> Unit ) {
+fun InputLengthModal(onClick: OnClick, currentLength : Int , errorText : String , onDismiss : () -> Unit, onSave : (Int) -> Unit ) {
 
     var totalLength by remember { mutableIntStateOf(currentLength) }
+  //  var errorString by remember { mutableStateOf(errorText) }
 
     AlertDialog(
         onDismissRequest = onDismiss ,
@@ -40,12 +42,13 @@ fun InputLengthModal(onClick: OnClick, currentLength : Int, onDismiss : () -> Un
         confirmButton = {
             Button(
                 onClick = {
-                    if(totalLength > 15) {
-
-                    }
-                    else {
-                        onSave(totalLength)
-                    }
+                    onSave(totalLength)
+//                    if(totalLength > 15) {
+//                        errorString = "Maximum Character Length is 15"
+//                    }
+//                    else {
+//                        onSave(totalLength)
+//                    }
                   //  onSave(1)
                 } ,
                 shape = RoundedCornerShape(10.dp),
@@ -91,7 +94,11 @@ fun InputLengthModal(onClick: OnClick, currentLength : Int, onDismiss : () -> Un
                 label = {
                     Text("Enter Length")
                 } ,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth() ,
+                supportingText = {
+                    if(errorText.isEmpty()) null else Text(errorText , color = Color.Red)
+                }
+
               //  placeholder = "Enter Length" ,
 
             )

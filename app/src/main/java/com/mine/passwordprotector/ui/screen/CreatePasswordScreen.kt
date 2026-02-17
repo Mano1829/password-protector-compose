@@ -1,6 +1,7 @@
 package com.mine.passwordprotector.ui.screen
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.snapping.SnapPosition
@@ -44,10 +45,15 @@ import com.mine.passwordprotector.ui.theme.Background
 import com.mine.passwordprotector.ui.theme.Black
 import com.mine.passwordprotector.ui.theme.Grey
 import com.mine.passwordprotector.ui.theme.White
+import com.mine.passwordprotector.ui.view.CircularSeekBar
+import kotlin.math.roundToInt
+import kotlin.random.Random
 
 enum class OnClick {
     Back , Save , Refresh , Number , UpperCase , Symbol
 }
+
+
 
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @Composable
@@ -68,26 +74,42 @@ fun CreatePasswordScreen(navController: NavHostController) {
                             else if(selectedInputModal!! == OnClick.Number) totalNumbers
                             else totalSymbols
 
+        var errorText by remember { mutableStateOf("") }
+
         InputLengthModal(
             selectedInputModal!!,
             currentLength,
+            errorText ,
             onDismiss = {
                 selectedInputModal = null
                 showInputModal = true
             },
         ) { enteredLength ->
-            if(selectedInputModal!! == OnClick.UpperCase) {
-                totalUpperCases = enteredLength
-            }
-            else if(selectedInputModal!! == OnClick.Number) {
-                totalNumbers = enteredLength
+
+            if(enteredLength > 15) {
+                errorText = "Maximum Character length is 15"
             }
             else {
-                totalSymbols = enteredLength
-            }
+                val totalLength = when (selectedInputModal!!) {
+                    OnClick.Number -> enteredLength + totalUpperCases + totalSymbols
+                    OnClick.UpperCase -> enteredLength + totalNumbers + totalSymbols
+                    else -> enteredLength + totalNumbers + totalUpperCases
+                }
 
-            selectedInputModal = null
-            showInputModal = true
+                if (totalLength <= totalCharacters) {
+                    if (selectedInputModal!! == OnClick.UpperCase) {
+                        totalUpperCases = enteredLength
+                    } else if (selectedInputModal!! == OnClick.Number) {
+                        totalNumbers = enteredLength
+                    } else {
+                        totalSymbols = enteredLength
+                    }
+                    selectedInputModal = null
+                    showInputModal = true
+                } else {
+                    errorText = "Current Maximum Characters is $totalCharacters"
+                }
+            }
         }
     }
 
@@ -117,6 +139,21 @@ fun CreatePasswordScreen(navController: NavHostController) {
                         selectedInputModal = onClick
                         showInputModal = true
                     }
+                    CircularSeekBar(
+                        min = 1.toFloat() ,
+                        max = 15.toFloat() ,
+                        initialValue = totalCharacters.toFloat() ,
+                        strokeWidth = 25.dp ,
+                        onValueChange = { value ->
+                            totalCharacters = value.roundToInt()
+                            Log.e("TAG" , "onValueChange :: $totalCharacters")
+                        } ,
+                        canvasSize = 250.dp ,
+                        title = "Characters" ,
+                        progressColor = Color(0xFFE91E63),
+                        backgroundColor = Color(0xFFEFEFEF),
+                        thumbColor = Color(0xFF8C9AFC),
+                    )
                 }
             }
 
@@ -130,7 +167,9 @@ fun CreatePasswordScreen(navController: NavHostController) {
             ) {
                 ContainerGeneratedPassword( generatedPassword ) { onClick ->
                     when(onClick) {
-                        OnClick.Refresh -> {}
+                        OnClick.Refresh -> {
+                            generatedPassword = generatePassword(totalNumbers , totalUpperCases , totalSymbols , totalCharacters)
+                        }
                         OnClick.Save -> {}
                         else -> {
                             navController.popBackStack()
@@ -223,8 +262,8 @@ fun ContainerGeneratedPassword(generatedPassword : String , onClick : (OnClick) 
     ) {
         Text("Generated Password".uppercase() , fontSize = 16.sp , fontWeight = FontWeight.W500 , color = Background )
         Spacer(Modifier.height(10.dp))
-        Text("ABC123$" , fontSize = 25.sp , fontWeight = FontWeight.Bold , color = Black)
-        Spacer(Modifier.height(30.dp))
+        Text(generatedPassword , fontSize = 25.sp , fontWeight = FontWeight.Bold , color = Black)
+        Spacer(Modifier.height(50.dp))
         Box(
             modifier = Modifier.fillMaxWidth().padding(horizontal = 15.dp)
         ) {
@@ -262,5 +301,36 @@ fun ContainerGeneratedPassword(generatedPassword : String , onClick : (OnClick) 
             )
         }
     }
+}
+
+fun generatePassword(totalNumbers : Int , totalUppercases : Int , totalSymbols : Int , totalCharacters: Int) : String {
+
+    val numbers = "0123456789"
+    val uppercases = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+    val lowercases = "abcdefghijklmnopqrstuvwxyz"
+    val symbols = "!@#$%^&*()-_=+[]{}?.,"
+    val generatedPassword = mutableListOf<Char>()
+
+    repeat(totalNumbers) {
+        generatedPassword += numbers.random()
+    }
+
+    repeat(totalUppercases) {
+        generatedPassword += uppercases.random()
+    }
+
+    repeat(totalSymbols) {
+        generatedPassword += symbols.random()
+    }
+
+    if(totalCharacters != (totalNumbers + totalUppercases + totalSymbols)) {
+        repeat(totalCharacters - (totalNumbers + totalUppercases + totalSymbols)) {
+            generatedPassword += lowercases.random()
+        }
+    }
+
+    generatedPassword.shuffle()
+
+    return generatedPassword.joinToString("")
 }
 
