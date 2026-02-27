@@ -187,8 +187,15 @@ fun StorePasswordModal(password: Password? , onDismiss : () -> Unit , onSave : (
                             }
                             else {
                                 servicePasswordError = ""
+
+                                val id = if(password == null) System.currentTimeMillis()
+                                         else {
+                                             if(password.id.toInt() == 0) System.currentTimeMillis()
+                                             else password.id
+                                         }
+
                                 val newPassword = Password(
-                                    password?.id ?: System.currentTimeMillis(),
+                                    id,
                                     password?.custId ?: "CID1",
                                     categorySelection ,
                                     serviceTitle ,

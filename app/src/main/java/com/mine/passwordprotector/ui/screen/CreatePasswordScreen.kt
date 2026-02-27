@@ -40,7 +40,10 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
 import com.mine.passwordprotector.R
+import com.mine.passwordprotector.data.local.Password
+import com.mine.passwordprotector.data.local.passwordPrint
 import com.mine.passwordprotector.ui.modal.InputLengthModal
+import com.mine.passwordprotector.ui.modal.StorePasswordModal
 import com.mine.passwordprotector.ui.theme.Background
 import com.mine.passwordprotector.ui.theme.Black
 import com.mine.passwordprotector.ui.theme.Grey
@@ -67,6 +70,8 @@ fun CreatePasswordScreen(navController: NavHostController) {
 
     var selectedInputModal by remember { mutableStateOf<OnClick?>(null) }
     var showInputModal by remember { mutableStateOf(false) }
+    var showStorePasswordModal by remember { mutableStateOf(false) }
+    var storePassword by remember { mutableStateOf<Password?>(null) }
 
     if(showInputModal && selectedInputModal != null) {
 
@@ -110,6 +115,17 @@ fun CreatePasswordScreen(navController: NavHostController) {
                     errorText = "Current Maximum Characters is $totalCharacters"
                 }
             }
+        }
+    }
+
+    if(showStorePasswordModal) {
+        StorePasswordModal(storePassword ,
+            onDismiss = {
+                storePassword = null
+                showStorePasswordModal = false
+            }
+        ) { password ->
+            Log.e("TAG" , "Password :: ${passwordPrint(password)}")
         }
     }
 
@@ -170,7 +186,19 @@ fun CreatePasswordScreen(navController: NavHostController) {
                         OnClick.Refresh -> {
                             generatedPassword = generatePassword(totalNumbers , totalUpperCases , totalSymbols , totalCharacters)
                         }
-                        OnClick.Save -> {}
+                        OnClick.Save -> {
+                            storePassword = Password(
+                                0,
+                                "CID1",
+                                "",
+                                "",
+                                "",
+                                generatedPassword,
+                                createdAt = ""
+                            )
+                            Log.e("TAG" , "Password :: ${passwordPrint(storePassword!!)}")
+                            showStorePasswordModal = true
+                        }
                         else -> {
                             navController.popBackStack()
                         }

@@ -23,12 +23,14 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
+
         installSplashScreen()
         setContent {
             PasswordProtectorTheme {
                 val navController = rememberNavController()
                 AppNavigation(navController)
             }
+         //   Text("APP STARTED")
         }
     }
 }

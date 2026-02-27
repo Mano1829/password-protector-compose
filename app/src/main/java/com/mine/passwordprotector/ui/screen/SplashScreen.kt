@@ -14,6 +14,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -32,6 +33,8 @@ import com.mine.passwordprotector.data.local.SessionManager
 import com.mine.passwordprotector.ui.theme.Background
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.delay
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -40,8 +43,12 @@ class SplashViewModel @Inject constructor(
     private val sessionManager: SessionManager
 ) : ViewModel() {
 
-    var startDestination by mutableStateOf<String?>(null)
-        private set
+   // var _startDestination by mutableStateOf<String?>(null)
+//        private set
+
+    private val _startDestination = MutableStateFlow<String?>(null)
+    val startDestination: StateFlow<String?> = _startDestination
+
 
     init {
         checkAuthentication()
@@ -50,7 +57,7 @@ class SplashViewModel @Inject constructor(
     private fun checkAuthentication() {
         viewModelScope.launch {
             delay(2000)
-            startDestination = "home"
+            _startDestination.value = "home"
            // startDestination = "create_password"
             // val userExists = sessionManager.isLoggedIn()
 
@@ -61,12 +68,12 @@ class SplashViewModel @Inject constructor(
 
 @Composable
 fun SplashScreen(navController : NavHostController , viewModel: SplashViewModel) {
-    val destination = viewModel.startDestination
-
+   // val destination = viewModel.startDestination
+    val destination by viewModel.startDestination.collectAsState()
     // LaunchedEffect reacts to the destination change
     LaunchedEffect(destination) {
-        if (destination != null) {
-            navController.navigate(destination) {
+        destination?.let {
+            navController.navigate(it) {
                 // Clear the splash from the backstack so user can't go back to it
                 popUpTo("splash") { inclusive = true }
             }

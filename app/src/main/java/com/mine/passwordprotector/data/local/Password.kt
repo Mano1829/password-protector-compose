@@ -6,6 +6,7 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.PrimaryKey
 import androidx.room.Query
+import kotlinx.coroutines.flow.Flow
 
 data class Password(
     val id : Long ,
@@ -16,6 +17,12 @@ data class Password(
     val serviceEncryptedHash : String ,
     val createdAt : String ,
 )
+
+fun passwordPrint(password: Password) : String {
+    return "Password :: ID[${password.id}] , CUSTID[${password.custId}] , Category[${password.category}] " +
+            ", ServiceTitle[${password.serviceTitle}] , ServiceUsername[${password.serviceUsername}] " +
+            ", ServicePassword[${password.serviceEncryptedHash}] , CreatedAt[${password.createdAt}]"
+}
 
 @Entity(tableName = "password_list")
 data class PasswordEntity(
@@ -35,6 +42,6 @@ interface PasswordDao {
     suspend fun insert(entity : PasswordEntity)
 
     @Query("SELECT * FROM password_list WHERE custId=:custID")
-    suspend fun getList(custID : String) : List<PasswordEntity>
+    fun getList(custID : String) : Flow<List<PasswordEntity>>
 
 }
